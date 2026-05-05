@@ -82,7 +82,7 @@ If you want to demo Copilot Coding Agent, there is an Issue for improving Code C
 
   1. Open the [demo-cart-page.prompt.md](../../.github/prompts/demo-cart-page.prompt.md) file
   2. Show the prompt structure: mode: 'agent', comprehensive tool list, detailed context about the current state
-  3. Attach the [cart image](../docs/design/cart.png) to the prompt
+  3. Attach the [cart image](../../docs/design/cart.png) to the prompt
   4. Click "Run" to execute the entire cart implementation automatically
   5. Show how the custom prompt handles the complete workflow with proper context
 
@@ -90,7 +90,7 @@ If you want to demo Copilot Coding Agent, there is an Issue for improving Code C
 
   1. Run the App to show the original code. Once the site starts, click on "Products" in the NavBar and show the Product Page. Add an item to the Cart - note that nothing actually happens, except a message saying, "Added to Cart". Explain that there is no Cart in the frontend app currently.
   2. Open Copilot and switch to "Plan" mode.
-  3. Attach the [cart image](../docs/design/cart.png) using the paperclip icon or drag/drop to add it to the chat.
+  3. Attach the [cart image](../../docs/design/cart.png) using the paperclip icon or drag/drop to add it to the chat.
   4. Enter the following prompt:
 
     ```txt
@@ -315,7 +315,7 @@ You can also use the Command Palette to start the MCP servers.
 - **How:**
   1. Select "RefinePrompt" in the Chat mode
   2. Enter a vague prompt: `I want a Cart page`. The output should ask some clarifying questions and have a low clarity score.
-  3. Attach the [cart image](docs/design/cart.png) to the Chat.
+  3. Attach the [cart image](../../docs/design/cart.png) to the Chat.
   4. Enter a more detailed prompt: `I want a cart Page that shows the items in the cart currently using the attached image for design elements. Match dark/light modes. Show a shipping fee of $25 but free for orders over $150. Add a cart icon to the NavBar that shows the number of items in the cart and updates when items are added/removed. When the icon is clicked, navigate to the Cart page.`
   5. You should get an even better prompt back with a high clarity score.
 
