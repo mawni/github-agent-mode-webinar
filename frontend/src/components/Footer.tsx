@@ -1,9 +1,23 @@
 import React from 'react';
 import { useTheme } from '../context/ThemeContext';
+import { API_BASE_URL } from '../api/config';
+
+const SUPPORTED_LANGUAGES = [
+  { code: 'en', label: 'English' },
+  { code: 'fr', label: 'Français' },
+  { code: 'de', label: 'Deutsch' },
+  { code: 'es', label: 'Español' },
+  { code: 'it', label: 'Italiano' },
+  { code: 'pt', label: 'Português' },
+  { code: 'ja', label: '日本語' },
+];
 
 const Footer: React.FC = () => {
   const { darkMode } = useTheme();
-  
+  const [selectedLang, setSelectedLang] = React.useState('en');
+
+  const termsDownloadUrl = `${API_BASE_URL}/api/terms/download?lang=${selectedLang}`;
+
   return (
     <footer className={`${darkMode ? 'bg-gray-900 text-gray-300' : 'bg-gray-200 text-gray-700'} py-8 transition-colors duration-300`}>
       <div className="container mx-auto px-4">
@@ -35,7 +49,31 @@ const Footer: React.FC = () => {
               <li><a href="#" className="hover:text-primary">Services</a></li>
               <li><a href="#" className="hover:text-primary">Supports</a></li>
               <li><a href="#" className="hover:text-primary">Feedback</a></li>
-              <li><a href="#" className="hover:text-primary">Terms & Conditions</a></li>
+              <li className="flex items-center gap-2 flex-wrap">
+                <a
+                  href={termsDownloadUrl}
+                  className="hover:text-primary"
+                  download={`terms-and-conditions-${selectedLang}.txt`}
+                >
+                  Terms &amp; Conditions
+                </a>
+                <select
+                  aria-label="Select language for Terms & Conditions download"
+                  value={selectedLang}
+                  onChange={(e) => setSelectedLang(e.target.value)}
+                  className={`text-xs rounded px-1 py-0.5 border ${
+                    darkMode
+                      ? 'bg-gray-800 border-gray-600 text-gray-300'
+                      : 'bg-white border-gray-400 text-gray-700'
+                  }`}
+                >
+                  {SUPPORTED_LANGUAGES.map((l) => (
+                    <option key={l.code} value={l.code}>
+                      {l.label}
+                    </option>
+                  ))}
+                </select>
+              </li>
               <li><a href="#" className="hover:text-primary">Privacy Policy</a></li>
             </ul>
           </div>
