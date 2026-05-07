@@ -36,6 +36,12 @@ erDiagram
 - **Backend**: Express.js, TypeScript, OpenAPI/Swagger
 - **DevOps**: Docker
 
+### Terms & Conditions Download
+- Footer link: `Terms & Conditions` downloads the terms document from the API.
+- Endpoint: `GET /api/terms/download`
+- Supported languages: `en`, `fr`, `de`, `es` (query with `?lang=` or inferred from `Accept-Language`).
+- Endpoint protections: user-agent bot/crawler filtering and per-client rate limiting.
+
 ## 🎯 Key Demo Scenarios
 
 1. **Vibe Coding**

@@ -1,8 +1,13 @@
 import React from 'react';
 import { useTheme } from '../context/ThemeContext';
+import { API_BASE_URL } from '../api/config';
 
 const Footer: React.FC = () => {
   const { darkMode } = useTheme();
+  const supportedLanguages = ['en', 'fr', 'de', 'es'];
+  const browserLanguage = typeof navigator !== 'undefined' ? navigator.language.toLowerCase().split('-')[0] : 'en';
+  const termsLanguage = supportedLanguages.includes(browserLanguage) ? browserLanguage : 'en';
+  const termsDownloadUrl = `${API_BASE_URL}/api/terms/download?lang=${termsLanguage}`;
   
   return (
     <footer className={`${darkMode ? 'bg-gray-900 text-gray-300' : 'bg-gray-200 text-gray-700'} py-8 transition-colors duration-300`}>
@@ -35,7 +40,7 @@ const Footer: React.FC = () => {
               <li><a href="#" className="hover:text-primary">Services</a></li>
               <li><a href="#" className="hover:text-primary">Supports</a></li>
               <li><a href="#" className="hover:text-primary">Feedback</a></li>
-              <li><a href="#" className="hover:text-primary">Terms & Conditions</a></li>
+              <li><a href={termsDownloadUrl} className="hover:text-primary">Terms & Conditions</a></li>
               <li><a href="#" className="hover:text-primary">Privacy Policy</a></li>
             </ul>
           </div>
