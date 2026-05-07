@@ -1,8 +1,10 @@
 import React from 'react';
 import { useTheme } from '../context/ThemeContext';
+import { API_BASE_URL } from '../api/config';
 
 const Footer: React.FC = () => {
   const { darkMode } = useTheme();
+  const termsDownloadUrl = `${API_BASE_URL}/api/terms/download`;
   
   return (
     <footer className={`${darkMode ? 'bg-gray-900 text-gray-300' : 'bg-gray-200 text-gray-700'} py-8 transition-colors duration-300`}>
@@ -35,7 +37,7 @@ const Footer: React.FC = () => {
               <li><a href="#" className="hover:text-primary">Services</a></li>
               <li><a href="#" className="hover:text-primary">Supports</a></li>
               <li><a href="#" className="hover:text-primary">Feedback</a></li>
-              <li><a href="#" className="hover:text-primary">Terms & Conditions</a></li>
+              <li><a href={termsDownloadUrl} download aria-label="Download Terms & Conditions document (TXT)" className="hover:text-primary">Terms & Conditions</a></li>
               <li><a href="#" className="hover:text-primary">Privacy Policy</a></li>
             </ul>
           </div>
