@@ -1,15 +1,14 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import request from 'supertest';
 import express from 'express';
-import termsRouter, { resetTermsDownloadRateLimit } from './terms';
+import { createTermsRateLimiter, createTermsRouter } from './terms';
 
 let app: express.Express;
 
 describe('Terms download API', () => {
   beforeEach(() => {
     app = express();
-    app.use('/terms', termsRouter);
-    resetTermsDownloadRateLimit();
+    app.use('/terms', createTermsRouter(createTermsRateLimiter()));
   });
 
   it('downloads terms in requested language', async () => {

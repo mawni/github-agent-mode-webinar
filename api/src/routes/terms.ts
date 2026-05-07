@@ -35,13 +35,14 @@
 
 import express from 'express';
 import path from 'path';
+import { rateLimit } from 'express-rate-limit';
 
-const router = express.Router();
-
-const BOT_USER_AGENT_PATTERN = /(bot|crawler|spider|slurp|bingpreview|facebookexternalhit|gptbot|chatgpt-user|claude|anthropic|ccbot|curl|wget|python-requests)/i;
-const RATE_LIMIT_WINDOW_MS = 60_000;
-const MAX_REQUESTS_PER_WINDOW = 10;
-const downloadRequestsByClient = new Map<string, number[]>();
+const BOT_USER_AGENT_PATTERN = /\b(bot|crawler|spider|slurp|bingpreview|facebookexternalhit|gptbot|chatgpt-user|claude|anthropic|ccbot|python-requests)\b/i;
+const DOWNLOAD_RATE_LIMIT_WINDOW_MS = Number(process.env.TERMS_RATE_LIMIT_WINDOW_MS) || 60_000;
+const DOWNLOAD_RATE_LIMIT_MAX_REQUESTS = Number(process.env.TERMS_RATE_LIMIT_MAX_REQUESTS) || 10;
+const TERMS_DIRECTORY_PATH = process.env.TERMS_DIRECTORY_PATH
+  ? path.resolve(process.env.TERMS_DIRECTORY_PATH)
+  : path.resolve(__dirname, '../../terms');
 
 const termsFiles = {
   en: 'terms-en.txt',
@@ -79,18 +80,10 @@ const getPreferredLanguage = (queryLanguage: unknown, acceptLanguageHeader?: str
 
 const isBlockedBotTraffic = (userAgent?: string): boolean => {
   if (!userAgent) {
-    return true;
+    return false;
   }
 
   return BOT_USER_AGENT_PATTERN.test(userAgent);
-};
-
-const getClientIdentifier = (req: express.Request): string => {
-  return req.ip || req.socket.remoteAddress || 'unknown-client';
-};
-
-export const resetTermsDownloadRateLimit = (): void => {
-  downloadRequestsByClient.clear();
 };
 
 const blockBots: express.RequestHandler = (req, res, next) => {
@@ -102,32 +95,35 @@ const blockBots: express.RequestHandler = (req, res, next) => {
   next();
 };
 
-const limitDownloadRate: express.RequestHandler = (req, res, next) => {
-  const now = Date.now();
-  const clientIdentifier = getClientIdentifier(req);
-  const requests = downloadRequestsByClient.get(clientIdentifier) ?? [];
-  const recentRequests = requests.filter(timestamp => now - timestamp < RATE_LIMIT_WINDOW_MS);
-
-  if (recentRequests.length >= MAX_REQUESTS_PER_WINDOW) {
-    res.status(429).json({ message: 'Too many requests. Please try again later.' });
-    return;
-  }
-
-  recentRequests.push(now);
-  downloadRequestsByClient.set(clientIdentifier, recentRequests);
-  next();
+export const createTermsRateLimiter = (): express.RequestHandler => {
+  return rateLimit({
+    windowMs: DOWNLOAD_RATE_LIMIT_WINDOW_MS,
+    max: DOWNLOAD_RATE_LIMIT_MAX_REQUESTS,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { message: 'Too many requests. Please try again later.' }
+  });
 };
 
-router.get('/download', blockBots, limitDownloadRate, (req, res) => {
-  const language = getPreferredLanguage(req.query.lang, req.get('accept-language'));
-  const filePath = path.resolve(__dirname, '../../terms', termsFiles[language]);
-  const downloadFileName = `terms-and-conditions-${language}.txt`;
+const sharedTermsRateLimiter = createTermsRateLimiter();
 
-  res.download(filePath, downloadFileName, (error) => {
-    if (error && !res.headersSent) {
-      res.status(500).json({ message: 'Unable to download terms and conditions.' });
-    }
+export const createTermsRouter = (rateLimiterMiddleware: express.RequestHandler = sharedTermsRateLimiter): express.Router => {
+  const router = express.Router();
+
+  router.get('/download', blockBots, rateLimiterMiddleware, (req, res) => {
+    const language = getPreferredLanguage(req.query.lang, req.get('accept-language'));
+    const filePath = path.resolve(TERMS_DIRECTORY_PATH, termsFiles[language]);
+    const downloadFileName = `terms-and-conditions-${language}.txt`;
+
+    res.download(filePath, downloadFileName, (error) => {
+      if (error && !res.headersSent) {
+        console.error('Terms download failed:', error);
+        res.status(500).json({ message: 'Unable to download terms and conditions.' });
+      }
+    });
   });
-});
 
-export default router;
+  return router;
+};
+
+export default createTermsRouter();
